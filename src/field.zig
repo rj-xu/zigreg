@@ -1,15 +1,15 @@
 const RegRw = @import("reg.zig").RegRw;
-const Mask = @import("mask.zig").Mask;
+const Bit = @import("mask.zig").Bit;
 
 pub const BitField = struct {
     reg: RegRw,
-    mask: Mask,
+    mask: Bit,
 
-    pub fn read(comptime self: *const BitField) u32 {
+    pub fn read(self: BitField) u32 {
         return self.reg.read(self.mask);
     }
 
-    pub fn write(comptime self: *const BitField) u32 {
+    pub fn write(self: BitField) u32 {
         return self.reg.write(self.mask);
     }
 };
