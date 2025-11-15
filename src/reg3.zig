@@ -84,10 +84,13 @@ pub const RegRw = struct {
         const wv = mask.insert(rv, val);
         self.W().write(wv);
     }
-    pub fn trigger(self: RegRw, val: u32, mask: Mask) void {
-        const rv = self.R().read(mask);
-        const wv = mask.insert(rv, val);
-        const zv = mask.insert(wv, 0x00);
+    pub fn trigger(self: RegRw, val: u32, mask: ?Mask) void {
+        var wv = self.R().read(mask);
+        var zv = wv;
+        if (mask) |m| {
+            wv = m.insert(wv, val);
+            zv = m.insert(zv, 0x00);
+        }
         self.W().write(wv);
         self.W().write(zv);
     }
