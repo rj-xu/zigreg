@@ -159,10 +159,7 @@ pub const RegRw = struct {
     pub fn BitBool(self: RegRw, mask: Mask) BitBoolRw {
         return .{ .reg = self.reg, .mask = mask };
     }
-    pub fn BitEnum(self: RegRw, mask: Mask, ty: type) BitEnumRw {
-        return .{ .reg = self.reg, .mask = mask, .ty = ty };
-    }
-    pub fn BitEnum2(self: RegRw, mask_: Mask, ty: type) type {
+    pub fn BitEnum(self: RegRw, mask_: Mask, ty: type) type {
         return struct {
             pub const mask = mask_;
             pub fn read() ty {

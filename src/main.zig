@@ -15,7 +15,6 @@ fn Config(addr: u32) type {
         pub const event_num = reg.BitField(Mask.bits(0, 2));
         pub const event_en = reg.BitBool(Mask.bit(3));
         pub const event_id = reg.BitEnum(Mask.bits(4, 5), EventId);
-        pub const event_id2 = reg.BitEnum2(Mask.bits(4, 5), EventId);
     };
 }
 
@@ -39,9 +38,4 @@ pub fn main() void {
     std.debug.print("EVENT_ID: {}\n", .{event_id});
     crypto.config.event_id.write(EventId.A);
     std.debug.print("{}\n", .{crypto.config.event_id.mask});
-
-    const event_id_2 = crypto.config.event_id2.read();
-    std.debug.print("EVENT_ID_2: {}\n", .{event_id_2});
-    crypto.config.event_id2.write(EventId.A);
-    std.debug.print("{}\n", .{crypto.config.event_id2.mask});
 }
