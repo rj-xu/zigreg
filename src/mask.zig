@@ -1,7 +1,7 @@
 pub const Mask = struct {
     s: u5,
     l: u5,
-    m: u32,
+    mask: u32,
 
     pub fn bit(start: u5) Mask {
         return bits(start, 1);
@@ -11,7 +11,7 @@ pub const Mask = struct {
         return .{
             .s = start,
             .l = len,
-            .m = ((1 << len) - 1) << start,
+            .mask = ((1 << len) - 1) << start,
         };
     }
 
@@ -20,26 +20,26 @@ pub const Mask = struct {
     }
 
     pub fn get(self: Mask, v: u32) u32 {
-        return v & self.m;
+        return v & self.mask;
     }
 
     pub fn set(self: Mask, v: u32) u32 {
-        return v | self.m;
+        return v | self.mask;
     }
 
     pub fn clear(self: Mask, v: u32) u32 {
-        return v & ~self.m;
+        return v & ~self.mask;
     }
 
     pub fn toggle(self: Mask, v: u32) u32 {
-        return v ^ self.m;
+        return v ^ self.mask;
     }
 
     pub fn extract(self: Mask, v: u32) u32 {
-        return (v & self.m) >> self.s;
+        return (v & self.mask) >> self.s;
     }
 
     pub fn insert(self: Mask, v: u32, x: u32) u32 {
-        return (v & ~self.m) | ((x << self.s) & self.m);
+        return (v & ~self.mask) | ((x << self.s) & self.mask);
     }
 };

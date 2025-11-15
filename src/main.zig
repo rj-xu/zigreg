@@ -1,6 +1,6 @@
 const std = @import("std");
 
-const RegRw = @import("field.zig").RegRw;
+const RegRw = @import("reg.zig").RegRw;
 const Mask = @import("mask.zig").Mask;
 
 pub const EventId = enum(u2) {
@@ -19,7 +19,7 @@ fn Config(reg: RegRw) type {
 
 pub const CRYPTO = struct {
     const BASE = 0x1a00;
-    pub const CONFIG = Config(.{ .reg = .{ .addr = BASE + 0x00, .size = 4 } });
+    pub const CONFIG = Config(.{ .addr = BASE + 0x00, .size = 4 });
 };
 
 pub fn main() void {
@@ -37,5 +37,5 @@ pub fn main() void {
     std.debug.print("EVENT_ID: {}\n", .{EVENT_ID});
     CRYPTO.CONFIG.EVENT_ID.write(EventId.A);
 
-    std.debug.print("{}\n", .{CRYPTO.CONFIG.EVENT_NUM._mask.m});
+    std.debug.print("{}\n", .{CRYPTO.CONFIG.EVENT_NUM.mask});
 }
