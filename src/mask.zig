@@ -3,20 +3,24 @@ pub const Mask = struct {
     l: u5,
     mask: u32,
 
-    pub fn bit(start: u5) Mask {
-        return bits(start, 1);
-    }
-
-    pub fn bits(start: u5, len: u5) Mask {
+    pub fn bits(s: u5, l: u5) Mask {
         return .{
-            .s = start,
-            .l = len,
-            .mask = ((1 << len) - 1) << start,
+            .s = s,
+            .l = l,
+            .mask = ((1 << l) - 1) << s,
         };
     }
 
-    pub fn byte(start: u5) Mask {
-        return bits(start * 8, 8);
+    pub fn bit(s: u5) Mask {
+        return bits(s, 1);
+    }
+
+    pub fn tuple(e: u5, s: u5) Mask {
+        return bits(s, e - s + 1);
+    }
+
+    pub fn byte(s: u5) Mask {
+        return bits(s * 8, 8);
     }
 
     pub fn get(self: Mask, v: u32) u32 {
