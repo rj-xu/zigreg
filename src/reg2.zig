@@ -15,7 +15,9 @@ pub const Reg = struct {
 fn Read(reg: Reg) type {
     return struct {
         pub fn read(mask: ?Mask) u32 {
-            const val = 0;
+            const seed: u64 = @bitCast(std.time.milliTimestamp());
+            var rng = std.Random.DefaultPrng.init(seed);
+            const val = rng.random().int(u32);
             // const ptr = @as(*volatile u32, @ptrFromInt(self.addr));
             // const val = ptr.*;
             std.debug.print("Read ", .{});

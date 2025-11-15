@@ -7,6 +7,7 @@ pub const EventId = enum(u2) {
     A = 0,
     B = 1,
     C = 2,
+    D = 3,
 };
 
 fn Config(addr: u32) type {
@@ -14,7 +15,7 @@ fn Config(addr: u32) type {
     return struct {
         pub const event_num = reg.BitField(Mask.bits(0, 2));
         pub const event_en = reg.BitBool(Mask.bit(3));
-        pub const event_id = reg.BitEnum(Mask.bits(4, 5), EventId);
+        pub const event_id = reg.BitEnum(Mask.bits(4, 2), EventId);
         pub const event_trigger = reg.BitTrigger(Mask.bit(6));
     };
 }
