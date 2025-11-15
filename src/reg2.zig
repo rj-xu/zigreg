@@ -64,6 +64,7 @@ fn Write(reg: Reg) type {
 //         }
 //     };
 // }
+
 pub fn RegRo(reg: Reg) type {
     return struct {
         const _reg: Reg = reg;
