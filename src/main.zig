@@ -11,7 +11,7 @@ pub const EventId = enum(u2) {
 };
 
 fn Config(addr: u32) type {
-    const reg :RegRw = .{.reg = .{ .addr = addr, .size = 4 }};
+    const reg: RegRw = .{ .reg = .{ .addr = addr, .size = 4 } };
     // const reg = RegRw(.{ .addr = addr, .size = 4 });
     return struct {
         pub const event_num = reg.BitField(Mask.bits(0, 2));
