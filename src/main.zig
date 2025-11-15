@@ -15,6 +15,7 @@ fn Config(addr: u32) type {
         pub const event_num = reg.BitField(Mask.bits(0, 2));
         pub const event_en = reg.BitBool(Mask.bit(3));
         pub const event_id = reg.BitEnum(Mask.bits(4, 5), EventId);
+        pub const event_id2 = reg.BitEnum2(Mask.bits(4, 5), EventId);
     };
 }
 
@@ -26,17 +27,21 @@ pub const crypto = struct {
 pub fn main() void {
     std.debug.print("Hello, World!\n", .{});
 
-    const EVENT_NUM = crypto.config.event_num.read();
-    std.debug.print("EVENT_NUM: {}\n", .{EVENT_NUM});
+    const event_num = crypto.config.event_num.read();
+    std.debug.print("EVENT_NUM: {}\n", .{event_num});
     crypto.config.event_num.write(0);
 
-    const EVENT_EN = crypto.config.event_en.read();
-    std.debug.print("EVENT_EN: {}\n", .{EVENT_EN});
+    const event_en = crypto.config.event_en.read();
+    std.debug.print("EVENT_EN: {}\n", .{event_en});
     crypto.config.event_en.write(false);
 
-    const EVENT_ID = crypto.config.event_id.read();
-    std.debug.print("EVENT_ID: {}\n", .{EVENT_ID});
+    const event_id = crypto.config.event_id.read();
+    std.debug.print("EVENT_ID: {}\n", .{event_id});
     crypto.config.event_id.write(EventId.A);
+    std.debug.print("{}\n", .{crypto.config.event_id.mask});
 
-    std.debug.print("{}\n", .{crypto.config.event_num.mask});
+    const event_id_2 = crypto.config.event_id2.read();
+    std.debug.print("EVENT_ID_2: {}\n", .{event_id_2});
+    crypto.config.event_id2.write(EventId.A);
+    std.debug.print("{}\n", .{crypto.config.event_id2.mask});
 }
