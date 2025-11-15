@@ -9,33 +9,34 @@ pub const EventId = enum(u2) {
     C = 2,
 };
 
-fn Config(reg: RegRw) type {
+fn Config(addr: u32) type {
+    const reg = RegRw.init(addr, 4);
     return struct {
-        pub const EVENT_NUM = reg.BitField(Mask.bits(0, 2));
-        pub const EVENT_EN = reg.BitBool(Mask.bit(3));
-        pub const EVENT_ID = reg.BitEnum(Mask.bits(4, 5), EventId);
+        pub const event_num = reg.BitField(Mask.bits(0, 2));
+        pub const event_en = reg.BitBool(Mask.bit(3));
+        pub const event_id = reg.BitEnum(Mask.bits(4, 5), EventId);
     };
 }
 
-pub const CRYPTO = struct {
-    const BASE = 0x1a00;
-    pub const CONFIG = Config(.{ .addr = BASE + 0x00, .size = 4 });
+pub const crypto = struct {
+    const base = 0x1a00;
+    pub const config = Config(base + 0x00);
 };
 
 pub fn main() void {
     std.debug.print("Hello, World!\n", .{});
 
-    const EVENT_NUM = CRYPTO.CONFIG.EVENT_NUM.read();
+    const EVENT_NUM = crypto.config.event_num.read();
     std.debug.print("EVENT_NUM: {}\n", .{EVENT_NUM});
-    CRYPTO.CONFIG.EVENT_NUM.write(0);
+    crypto.config.event_num.write(0);
 
-    const EVENT_EN = CRYPTO.CONFIG.EVENT_EN.read();
+    const EVENT_EN = crypto.config.event_en.read();
     std.debug.print("EVENT_EN: {}\n", .{EVENT_EN});
-    CRYPTO.CONFIG.EVENT_EN.write(false);
+    crypto.config.event_en.write(false);
 
-    const EVENT_ID = CRYPTO.CONFIG.EVENT_ID.read();
+    const EVENT_ID = crypto.config.event_id.read();
     std.debug.print("EVENT_ID: {}\n", .{EVENT_ID});
-    CRYPTO.CONFIG.EVENT_ID.write(EventId.A);
+    crypto.config.event_id.write(EventId.A);
 
-    std.debug.print("{}\n", .{CRYPTO.CONFIG.EVENT_NUM.mask});
+    std.debug.print("{}\n", .{crypto.config.event_num.mask});
 }
