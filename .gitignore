@@ -1,3 +1,10 @@
 .zig-cache/
 zig-out/
 *.o
+
+
+*.obj
+*.exe
+*.pdb
+*.lib
+*.s

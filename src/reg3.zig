@@ -12,58 +12,6 @@ pub const Reg = struct {
     }
 };
 
-// fn Read(reg: Reg) type {
-//     return struct {
-//         pub fn read(mask: ?Mask) u32 {
-//             const seed: u64 = @bitCast(std.time.milliTimestamp());
-//             var rng = std.Random.DefaultPrng.init(seed);
-//             const val = rng.random().int(u32);
-//             // const ptr = @as(*volatile u32, @ptrFromInt(self.addr));
-//             // const val = ptr.*;
-//             std.debug.print("Read ", .{});
-//             reg.print_name();
-//             std.debug.print(" = 0x{X}\n", .{val});
-//             if (mask) |m| {
-//                 return m.extract(val);
-//             }
-//             return val;
-//         }
-//     };
-// }
-
-// fn Write(reg: Reg) type {
-//     return struct {
-//         pub fn write(val: u32) void {
-//             std.debug.print("Write ", .{});
-//             reg.print_name();
-//             std.debug.print(" = 0x{X}\n", .{val});
-//             // const ptr = @as(*volatile u32, @ptrFromInt(self.addr));
-//             // ptr.* = val;
-//         }
-//         // pub fn trigger(val: u32) void {
-//         //     write(val);
-//         //     write(0x00);
-//         // }
-//     };
-// }
-// fn ReadWrite(reg: Reg) type {
-//     return struct {
-//         const r = Read(reg);
-//         const w = Write(reg);
-//         pub fn modify(val: u32, mask: Mask) void {
-//             const rv = r.read(null);
-//             const wv = mask.insert(rv, val);
-//             w.write(wv);
-//         }
-//         pub fn trigger(val: u32, mask: ?Mask) void {
-//             const rv = r.read(mask);
-//             const wv = mask.insert(rv, val);
-//             const zv = mask.insert(wv, 0x00);
-//             w.write(wv);
-//             w.write(zv);
-//         }
-//     };
-// }
 pub const RegRo = struct {
     _reg: Reg,
 
@@ -125,29 +73,29 @@ pub const RegWo = struct {
 
 pub const RegRw = struct {
     _reg: Reg,
-    pub fn r(self: RegRw) RegRo {
+    pub fn R(self: RegRw) RegRo {
         return RegRo{ ._reg = self._reg };
     }
-    pub fn w(self: RegRw) RegWo {
+    pub fn W(self: RegRw) RegWo {
         return RegWo{ ._reg = self._reg };
     }
     pub fn modify(self: RegRw, val: u32, mask: Mask) void {
-        const rv = self.r().read(null);
+        const rv = self.R().read(null);
         const wv = mask.insert(rv, val);
-        self.w().write(wv);
+        self.W().write(wv);
     }
-    pub fn trigger_field(self: RegRw, val: u32, mask: Mask) void {
-        const rv = self.r().read(mask);
+    pub fn trigger(self: RegRw, val: u32, mask: Mask) void {
+        const rv = self.R().read(mask);
         const wv = mask.insert(rv, val);
         const zv = mask.insert(wv, 0x00);
-        self.w().write(wv);
-        self.w().write(zv);
+        self.W().write(wv);
+        self.W().write(zv);
     }
     pub fn BitField(self: RegRw, mask: Mask) type {
         return struct {
             pub const _mask = mask;
             pub fn read() u32 {
-                return self.r().read(mask);
+                return self.R().read(mask);
             }
             pub fn write(val: u32) void {
                 self.modify(val, mask);
@@ -158,7 +106,7 @@ pub const RegRw = struct {
         return struct {
             pub const _mask = mask;
             pub fn read() bool {
-                return self.r().read(mask) != 0;
+                return self.R().read(mask) != 0;
             }
             pub fn write(val: bool) void {
                 self.modify(if (val) 1 else 0, mask);
@@ -169,7 +117,7 @@ pub const RegRw = struct {
         return struct {
             pub const _mask = mask;
             pub fn read() ty {
-                return @enumFromInt(self.r().read(mask));
+                return @enumFromInt(self.R().read(mask));
             }
             pub fn write(val: ty) void {
                 self.modify(@intFromEnum(val), mask);
@@ -180,7 +128,7 @@ pub const RegRw = struct {
         return struct {
             pub const _mask = mask;
             pub fn trigger(val: u32) void {
-                self.trigger_field(val, mask);
+                self.trigger(val, mask);
             }
         };
     }
