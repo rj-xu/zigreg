@@ -73,32 +73,32 @@ pub const RegWo = struct {
 
 pub const RegRw = struct {
     reg: Reg,
-    pub fn R(self: RegRw) RegRo {
+    pub fn as_ro(self: RegRw) RegRo {
         return RegRo{ .reg = self.reg };
     }
-    pub fn W(self: RegRw) RegWo {
+    pub fn as_wo(self: RegRw) RegWo {
         return RegWo{ .reg = self.reg };
     }
     pub fn modify(self: RegRw, val: u32, mask: Mask) void {
-        const rv = self.R().read(null);
+        const rv = self.as_ro().read(null);
         const wv = mask.insert(rv, val);
-        self.W().write(wv);
+        self.as_wo().write(wv);
     }
     pub fn trigger(self: RegRw, val: u32, mask: ?Mask) void {
-        var wv = self.R().read(mask);
+        var wv = self.as_ro().read(mask);
         var zv = wv;
         if (mask) |m| {
             wv = m.insert(wv, val);
             zv = m.insert(zv, 0x00);
         }
-        self.W().write(wv);
-        self.W().write(zv);
+        self.as_wo().write(wv);
+        self.as_wo().write(zv);
     }
     pub fn BitField(self: RegRw, mask: Mask) type {
         return struct {
             pub const _mask = mask;
             pub fn read() u32 {
-                return self.R().read(mask);
+                return self.as_ro().read(mask);
             }
             pub fn write(val: u32) void {
                 self.modify(val, mask);
@@ -109,7 +109,7 @@ pub const RegRw = struct {
         return struct {
             pub const _mask = mask;
             pub fn read() bool {
-                return self.R().read(mask) != 0;
+                return self.as_ro().read(mask) != 0;
             }
             pub fn write(val: bool) void {
                 self.modify(if (val) 1 else 0, mask);
@@ -120,7 +120,7 @@ pub const RegRw = struct {
         return struct {
             pub const _mask = mask;
             pub fn read() ty {
-                return @enumFromInt(self.R().read(mask));
+                return @enumFromInt(self.as_ro().read(mask));
             }
             pub fn write(val: ty) void {
                 self.modify(@intFromEnum(val), mask);
