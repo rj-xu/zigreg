@@ -13,7 +13,7 @@ pub const Reg = struct {
 };
 
 pub const RegRo = struct {
-    _reg: Reg,
+    reg: Reg,
 
     pub fn read(self: RegRo, mask: ?Mask) u32 {
         const seed: u64 = @bitCast(std.time.milliTimestamp());
@@ -22,7 +22,7 @@ pub const RegRo = struct {
         // const ptr = @as(*volatile u32, @ptrFromInt(self.addr));
         // const val = ptr.*;
         std.debug.print("Read ", .{});
-        self._reg.print_name();
+        self.reg.print_name();
         std.debug.print(" = 0x{X}\n", .{val});
         if (mask) |m| {
             return m.extract(val);
@@ -57,10 +57,10 @@ pub const RegRo = struct {
 };
 
 pub const RegWo = struct {
-    _reg: Reg,
+    reg: Reg,
     pub fn write(self: RegWo, val: u32) void {
         std.debug.print("Write ", .{});
-        self._reg.print_name();
+        self.reg.print_name();
         std.debug.print(" = 0x{X}\n", .{val});
         // const ptr = @as(*volatile u32, @ptrFromInt(self.addr));
         // ptr.* = val;
@@ -72,12 +72,12 @@ pub const RegWo = struct {
 };
 
 pub const RegRw = struct {
-    _reg: Reg,
+    reg: Reg,
     pub fn R(self: RegRw) RegRo {
-        return RegRo{ ._reg = self._reg };
+        return RegRo{ .reg = self.reg };
     }
     pub fn W(self: RegRw) RegWo {
-        return RegWo{ ._reg = self._reg };
+        return RegWo{ .reg = self.reg };
     }
     pub fn modify(self: RegRw, val: u32, mask: Mask) void {
         const rv = self.R().read(null);
