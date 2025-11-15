@@ -7,9 +7,8 @@ const Access = enum { RO, WO, RW };
 pub const Reg = struct {
     addr: u32,
     size: u32,
-    access: Access,
     pub fn print_name(self: Reg) void {
-        std.debug.print("Reg{s}[0x{X}]", .{ @tagName(self.access), self.addr });
+        std.debug.print("Reg[0x{X}]", .{self.addr});
     }
 };
 
@@ -39,10 +38,31 @@ fn Write(reg: Reg) type {
             // const ptr = @as(*volatile u32, @ptrFromInt(self.addr));
             // ptr.* = val;
         }
+        // pub fn trigger(val: u32) void {
+        //     write(val);
+        //     write(0x00);
+        // }
     };
 }
-
-fn RegRo(reg: Reg) type {
+// fn ReadWrite(reg: Reg) type {
+//     return struct {
+//         const r = Read(reg);
+//         const w = Write(reg);
+//         pub fn modify(val: u32, mask: Mask) void {
+//             const rv = r.read(null);
+//             const wv = mask.insert(rv, val);
+//             w.write(wv);
+//         }
+//         pub fn trigger(val: u32, mask: ?Mask) void {
+//             const rv = r.read(mask);
+//             const wv = mask.insert(rv, val);
+//             const zv = mask.insert(wv, 0x00);
+//             w.write(wv);
+//             w.write(zv);
+//         }
+//     };
+// }
+pub fn RegRo(reg: Reg) type {
     return struct {
         const _reg: Reg = reg;
         const r = Read(reg);
@@ -73,28 +93,28 @@ fn RegRo(reg: Reg) type {
     };
 }
 
-fn RegWo(reg: Reg) type {
+pub fn RegWo(reg: Reg) type {
     return struct {
         const _reg: Reg = reg;
         const w = Write(reg);
-        pub fn trigger(self: @This(), val: u32) void {
-            self.w.write(val);
-            self.w.write(0x00);
+        pub fn trigger(val: u32) void {
+            w.write(val);
+            w.write(0x00);
         }
     };
 }
 
-fn RegRw(reg: Reg) type {
+pub fn RegRw(reg: Reg) type {
     return struct {
         const _reg: Reg = reg;
         const r = Read(reg);
         const w = Write(reg);
         pub fn modify(val: u32, mask: Mask) void {
-            const rv = reg.read(null);
+            const rv = r.read(null);
             const wv = mask.insert(rv, val);
             w.write(wv);
         }
-        pub fn trigger(val: u32, mask: ?Mask) void {
+        pub fn trigger_field(val: u32, mask: Mask) void {
             const rv = r.read(mask);
             const wv = mask.insert(rv, val);
             const zv = mask.insert(wv, 0x00);
@@ -131,6 +151,14 @@ fn RegRw(reg: Reg) type {
                 }
                 pub fn write(val: ty) void {
                     modify(@intFromEnum(val), mask);
+                }
+            };
+        }
+        pub fn BitTrigger(mask: Mask) type {
+            return struct {
+                pub const _mask = mask;
+                pub fn trigger(val: u32) void {
+                    trigger_field(val, mask);
                 }
             };
         }
