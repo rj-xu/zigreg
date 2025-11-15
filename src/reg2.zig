@@ -146,13 +146,13 @@ pub fn RegRw(reg: Reg) type {
                 }
             };
         }
-        pub fn BitEnum(mask: Mask, ty: type) type {
+        pub fn BitEnum(mask: Mask, T: type) type {
             return struct {
                 pub const _mask = mask;
-                pub fn read() ty {
+                pub fn read() T {
                     return @enumFromInt(r.read(mask));
                 }
-                pub fn write(val: ty) void {
+                pub fn write(val: T) void {
                     modify(@intFromEnum(val), mask);
                 }
             };

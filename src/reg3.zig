@@ -116,13 +116,13 @@ pub const RegRw = struct {
             }
         };
     }
-    pub fn BitEnum(self: RegRw, mask: Mask, ty: type) type {
+    pub fn BitEnum(self: RegRw, mask: Mask, T: type) type {
         return struct {
             pub const _mask = mask;
-            pub fn read() ty {
+            pub fn read() T {
                 return @enumFromInt(self.as_ro().read(mask));
             }
-            pub fn write(val: ty) void {
+            pub fn write(val: T) void {
                 self.modify(@intFromEnum(val), mask);
             }
         };
