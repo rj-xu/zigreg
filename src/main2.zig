@@ -1,0 +1,68 @@
+const std = @import("std");
+
+const RegRw = @import("reg3.zig").RegRw;
+const Mask = @import("mask.zig").Mask;
+const StructField = std.builtin.Type.StructField;
+
+pub const EventId = enum(u2) {
+    A = 0,
+    B = 1,
+    C = 2,
+    D = 3,
+};
+
+fn Config(addr: u32) type {
+    const reg: RegRw = .{ .reg = .{ .addr = addr, .size = 4 } };
+    const fields = [_]StructField{
+        .{
+            .alignment = 8,
+            .name = "event_num",
+            .type = reg.BitField(Mask.bits(0, 2)),
+            .is_comptime = true,
+            .default_value_ptr = null,
+        },
+        .{
+            .alignment = 8,
+            .name = "event_en",
+            .type = reg.BitBool(Mask.bit(3)),
+            .is_comptime = true,
+            .default_value_ptr = null,
+        },
+    };
+
+    const T = @Type(.{ .@"struct" = .{
+        .layout = .auto,
+        .fields = &fields,
+        .decls = &.{},
+        .is_tuple = false,
+    } });
+
+    return T;
+}
+
+pub const crypto = struct {
+    const base = 0x1a00;
+    pub const config = Config(base + 0x00);
+};
+
+fn max(comptime T: type, a: T, b: T) T {
+    return if (a > b) a else b;
+}
+
+pub fn main() void {
+    std.debug.print("Hello, World!\n", .{});
+
+    const event_num = crypto.config.event_num.read();
+    std.debug.print("EVENT_NUM: {}\n", .{event_num});
+    crypto.config.event_num.write(0);
+
+    const event_en = crypto.config.event_en.read();
+    std.debug.print("EVENT_EN: {}\n", .{event_en});
+    crypto.config.event_en.write(false);
+
+    // const event_id = crypto.config.event_id.read();
+    // std.debug.print("EVENT_ID: {}\n", .{event_id});
+    // crypto.config.event_id.write(EventId.A);
+
+    // crypto.config.event_trigger.trigger(1);
+}

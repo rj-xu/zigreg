@@ -1,3 +1,23 @@
+pub const RawMask = struct {
+    mask: u32,
+
+    pub fn get(self: Mask, v: u32) u32 {
+        return v & self.mask;
+    }
+
+    pub fn set(self: Mask, v: u32) u32 {
+        return v | self.mask;
+    }
+
+    pub fn clear(self: Mask, v: u32) u32 {
+        return v & ~self.mask;
+    }
+
+    pub fn toggle(self: Mask, v: u32) u32 {
+        return v ^ self.mask;
+    }
+};
+
 pub const Mask = struct {
     s: u5,
     l: u5,

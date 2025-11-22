@@ -1,8 +1,12 @@
 const std = @import("std");
-
 const Mask = @import("mask.zig").Mask;
-
-const Access = enum { RO, WO, RW };
+const field = @import("field.zig");
+const BitFieldRo = field.BitFieldRo;
+const BitBoolRo = field.BitBoolRo;
+const BitEnumRo = field.BitEnumRo;
+const BitFieldRw = field.BitFieldRw;
+const BitBoolRw = field.BitBoolRw;
+const BitEnumRw = field.BitEnumRw;
 
 pub const Reg = struct {
     addr: u32,
@@ -14,7 +18,6 @@ pub const Reg = struct {
 
 pub const RegRo = struct {
     reg: Reg,
-
     pub fn read(self: RegRo, mask: ?Mask) u32 {
         const seed: u64 = @bitCast(std.time.milliTimestamp());
         var rng = std.Random.DefaultPrng.init(seed);
@@ -29,30 +32,14 @@ pub const RegRo = struct {
         }
         return val;
     }
-
-    pub fn BitField(self: RegRo, mask: Mask) type {
-        return struct {
-            pub const _mask = mask;
-            pub fn read() u32 {
-                return self.read(mask);
-            }
-        };
+    pub fn BitField(self: RegRo, mask: Mask) BitFieldRo {
+        return BitFieldRo{ .reg = self, .mask = mask };
     }
-    pub fn BitBool(self: RegRo, mask: Mask) type {
-        return struct {
-            pub const _mask = mask;
-            pub fn read() bool {
-                return self.read(mask) != 0;
-            }
-        };
+    pub fn BitBool(self: RegRo, mask: Mask) BitBoolRo {
+        return BitBoolRo{ .reg = self, .mask = mask };
     }
-    pub fn BitEnum(self: RegRo, mask: Mask, ty: type) type {
-        return struct {
-            pub const _mask = mask;
-            pub fn read() ty {
-                return @enumFromInt(self.read(mask));
-            }
-        };
+    pub fn BitEnum(self: RegRo, mask: Mask, comptime T: type) type {
+        return BitEnumRo(self, mask, T);
     }
 };
 
@@ -94,45 +81,13 @@ pub const RegRw = struct {
         self.as_w().write(wv);
         self.as_w().write(zv);
     }
-    pub fn BitField(self: RegRw, m: Mask) type {
-        return struct {
-            pub const mask = m;
-            pub fn read() u32 {
-                return self.as_r().read(m);
-            }
-            pub fn write(val: u32) void {
-                self.modify(val, m);
-            }
-        };
+    pub fn BitField(self: RegRw, mask: Mask) BitFieldRw {
+        return BitFieldRw{ .reg = self, .mask = mask };
     }
-    pub fn BitBool(self: RegRw, m: Mask) type {
-        return struct {
-            pub const mask = m;
-            pub fn read() bool {
-                return self.as_r().read(m) != 0;
-            }
-            pub fn write(val: bool) void {
-                self.modify(if (val) 1 else 0, m);
-            }
-        };
+    pub fn BitBool(self: RegRw, mask: Mask) BitBoolRw {
+        return BitBoolRw{ .reg = self, .mask = mask };
     }
-    pub fn BitEnum(self: RegRw, mask: Mask, T: type) type {
-        return struct {
-            pub const _mask = mask;
-            pub fn read() T {
-                return @enumFromInt(self.as_r().read(mask));
-            }
-            pub fn write(val: T) void {
-                self.modify(@intFromEnum(val), mask);
-            }
-        };
-    }
-    pub fn BitTrigger(self: RegRw, mask: Mask) type {
-        return struct {
-            pub const _mask = mask;
-            pub fn trigger(val: u32) void {
-                self.trigger(val, mask);
-            }
-        };
+    pub fn BitEnum(self: RegRw, mask: Mask, T: type) BitEnumRw(T) {
+        return .{ .reg = self, .mask = mask };
     }
 };
