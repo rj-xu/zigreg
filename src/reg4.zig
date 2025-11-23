@@ -8,18 +8,28 @@ const BitFieldRw = field.BitFieldRw;
 const BitBoolRw = field.BitBoolRw;
 const BitEnumRw = field.BitEnumRw;
 
+pub const Access = enum {
+    RO,
+    WO,
+    RW,
+};
+
 pub const Reg = struct {
     addr: u32,
     size: u32,
     pub fn print_name(self: Reg) void {
-        std.debug.print("Reg[0x{X}]", .{self.addr});
+        std.debug.print("Reg[0x{X}]", .{
+            self.addr,
+        });
     }
 };
 
 pub const RegRo = struct {
     reg: Reg,
+    const access: Access = .RO;
+
     pub fn read(self: RegRo, mask: ?Mask) u32 {
-        const seed: u64 = @bitCast(std.time.milliTimestamp());
+        const seed: u64 = 0xFFFF_FFFF;
         var rng = std.Random.DefaultPrng.init(seed);
         const val = rng.random().int(u32);
         // const ptr = @as(*volatile u32, @ptrFromInt(self.addr));
@@ -38,13 +48,14 @@ pub const RegRo = struct {
     pub fn BitBool(self: RegRo, mask: Mask) BitBoolRo {
         return BitBoolRo{ .reg = self, .mask = mask };
     }
-    pub fn BitEnum(self: RegRo, mask: Mask, comptime T: type) type {
-        return BitEnumRo(self, mask, T);
+    pub fn BitEnum(self: RegRo, mask: Mask, comptime T: type) BitEnumRo(T) {
+        return .{ .reg = self, .mask = mask };
     }
 };
 
 pub const RegWo = struct {
     reg: Reg,
+    const access: Access = .WO;
     pub fn write(self: RegWo, val: u32) void {
         std.debug.print("Write ", .{});
         self.reg.print_name();
@@ -60,6 +71,7 @@ pub const RegWo = struct {
 
 pub const RegRw = struct {
     reg: Reg,
+    const access: Access = .RW;
     pub fn as_r(self: RegRw) RegRo {
         return RegRo{ .reg = self.reg };
     }
