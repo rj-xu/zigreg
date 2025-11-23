@@ -33,6 +33,9 @@ pub fn main() void {
     std.debug.print("Hello, World!\n", .{});
     std.debug.print("{d}\n", .{max(u32, 1, 2)});
 
+    const x = crypto.config.reg.r.read(null);
+    std.debug.print("x: {d}\n", .{x});
+
     const event_num = crypto.config.event_num.read();
     const a = @typeName(@TypeOf(event_num));
     std.debug.print("a: {s}\n", .{a});

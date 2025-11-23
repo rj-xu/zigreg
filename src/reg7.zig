@@ -20,7 +20,7 @@ pub const Reg = struct {
 
 fn Read(reg: Reg) type {
     return struct {
-        fn read(mask: ?Mask) u32 {
+        pub fn read(mask: ?Mask) u32 {
             const val: u32 = 0x00;
             std.debug.print("Read ", .{});
             reg.print_name();
@@ -47,25 +47,10 @@ fn Write(reg: Reg) type {
     };
 }
 
-pub fn RegRo(reg: Reg) type {
+fn ReadWrite(reg: Reg) type {
+    const r = Read(reg);
+    const w = Write(reg);
     return struct {
-        reg: Reg,
-        const r = Read(reg);
-    };
-}
-
-pub fn RegWo(reg: Reg) type {
-    return struct {
-        reg: Reg,
-        const w = Write(reg);
-    };
-}
-
-pub fn RegRw(reg: Reg) type {
-    return struct {
-        reg: Reg,
-        const r = Read(reg);
-        const w = Write(reg);
         pub fn modify(val: u32, mask: Mask) void {
             const rv = r.read(null);
             const wv = mask.insert(rv, val);
@@ -78,13 +63,36 @@ pub fn RegRw(reg: Reg) type {
             w.write(wv);
             w.write(zv);
         }
+    };
+}
+
+pub fn RegRo(reg: Reg) type {
+    return struct {
+        reg: Reg,
+        pub const r = Read(reg);
+    };
+}
+
+pub fn RegWo(reg: Reg) type {
+    return struct {
+        reg: Reg,
+        pub const w = Write(reg);
+    };
+}
+
+pub fn RegRw(reg: Reg) type {
+    return struct {
+        reg: Reg,
+        pub const r = Read(reg);
+        pub const w = Write(reg);
+        pub const rw = ReadWrite(reg);
         pub fn BitField(mask: Mask) type {
             return struct {
                 pub fn read() u32 {
                     return r.read(mask);
                 }
                 pub fn write(val: u32) void {
-                    modify(val, mask);
+                    rw.modify(val, mask);
                 }
             };
         }
@@ -94,7 +102,7 @@ pub fn RegRw(reg: Reg) type {
                     return r.read(mask) != 0;
                 }
                 pub fn write(val: bool) void {
-                    modify(if (val) 1 else 0, mask);
+                    rw.modify(if (val) 1 else 0, mask);
                 }
             };
         }
@@ -104,7 +112,7 @@ pub fn RegRw(reg: Reg) type {
                     return @enumFromInt(r.read(mask));
                 }
                 pub fn write(val: T) void {
-                    modify(@intFromEnum(val), mask);
+                    rw.modify(@intFromEnum(val), mask);
                 }
             };
         }
