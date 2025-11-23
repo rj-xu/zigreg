@@ -26,8 +26,7 @@ pub const Reg = struct {
 
 pub const RegRo = struct {
     reg: Reg,
-    const access: Access = .RO;
-
+    comptime access: Access = .RO,
     pub fn read(self: RegRo, mask: ?Mask) u32 {
         const seed: u64 = 0xFFFF_FFFF;
         var rng = std.Random.DefaultPrng.init(seed);
@@ -55,7 +54,7 @@ pub const RegRo = struct {
 
 pub const RegWo = struct {
     reg: Reg,
-    const access: Access = .WO;
+    comptime access: Access = .WO,
     pub fn write(self: RegWo, val: u32) void {
         std.debug.print("Write ", .{});
         self.reg.print_name();
@@ -71,7 +70,7 @@ pub const RegWo = struct {
 
 pub const RegRw = struct {
     reg: Reg,
-    const access: Access = .RW;
+    comptime access: Access = .RW,
     pub fn as_r(self: RegRw) RegRo {
         return RegRo{ .reg = self.reg };
     }

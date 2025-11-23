@@ -1,6 +1,6 @@
 const std = @import("std");
 
-const RegRw = @import("reg4.zig").RegRw;
+const RegRw = @import("reg6.zig").RegRw;
 const Mask = @import("mask.zig").Mask;
 
 pub const EventId = enum(u2) {
@@ -40,15 +40,15 @@ pub fn main() void {
     std.debug.print("a: {s}\n", .{a});
 
     std.debug.print("EVENT_NUM: {}\n", .{event_num});
-    crypto.config.event_num.write(0);
+    crypto.config.event_num.write(1);
 
     const event_en = crypto.config.event_en.read();
     std.debug.print("EVENT_EN: {}\n", .{event_en});
-    crypto.config.event_en.write(false);
+    crypto.config.event_en.write(true);
 
     const event_id = crypto.config.event_id.read();
     std.debug.print("EVENT_ID: {}\n", .{event_id});
-    crypto.config.event_id.write(EventId.A);
+    crypto.config.event_id.write(EventId.C);
 
     // crypto.config.event_trigger.trigger(1);
 }
