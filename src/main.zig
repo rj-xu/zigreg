@@ -37,15 +37,12 @@ pub fn main() void {
     std.debug.print("x: {d}\n", .{x});
 
     const event_num = crypto.config.event_num.read();
-    const a = @typeName(@TypeOf(event_num));
-    std.debug.print("a: {s}\n", .{a});
-
     std.debug.print("EVENT_NUM: {}\n", .{event_num});
     crypto.config.event_num.write(1);
 
     const event_en = crypto.config.event_en.read();
     std.debug.print("EVENT_EN: {}\n", .{event_en});
-    crypto.config.event_en.write(true);
+    crypto.config.event_en.write   (true);
 
     const event_id = crypto.config.event_id.read();
     std.debug.print("EVENT_ID: {}\n", .{event_id});

@@ -21,7 +21,9 @@ pub const Reg = struct {
 fn Read(reg: Reg) type {
     return struct {
         pub fn read(mask: ?Mask) u32 {
-            const val: u32 = 0x00;
+            const seed: u64 = @bitCast(std.time.milliTimestamp());
+            var rng = std.Random.DefaultPrng.init(seed);
+            const val = rng.random().int(u32);
             std.debug.print("Read ", .{});
             reg.print_name();
             std.debug.print(" = 0x{X}\n", .{val});
@@ -68,21 +70,21 @@ fn ReadWrite(reg: Reg) type {
 
 pub fn RegRo(reg: Reg) type {
     return struct {
-        reg: Reg,
+        pub const _reg = reg;
         pub const r = Read(reg);
     };
 }
 
 pub fn RegWo(reg: Reg) type {
     return struct {
-        reg: Reg,
+        pub const _reg = reg;
         pub const w = Write(reg);
     };
 }
 
 pub fn RegRw(reg: Reg) type {
     return struct {
-        reg: Reg,
+        pub const _reg = reg;
         pub const r = Read(reg);
         pub const w = Write(reg);
         pub const rw = ReadWrite(reg);
