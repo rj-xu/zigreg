@@ -1,6 +1,6 @@
 const std = @import("std");
 
-const RegRw = @import("reg6.zig").RegRw;
+const RegRw = @import("reg7.zig").RegRw;
 const Mask = @import("mask.zig").Mask;
 
 pub const EventId = enum(u2) {
@@ -13,12 +13,10 @@ pub const EventId = enum(u2) {
 fn Config(addr: u32) type {
     return struct {
         // const reg: RegRw = .{ .reg = .{ .addr = addr, .size = 4 } };
-        // const reg = RegRw(.{ .addr = addr, .size = 4 });
-        const reg: RegRw = .{ .reg = .{ .addr = addr, .size = 4 } };
+        const reg = RegRw(.{ .addr = addr, .size = 4 });
         pub const event_num = reg.BitField(Mask.bits(0, 2));
         pub const event_en = reg.BitBool(Mask.bit(3));
         pub const event_id = reg.BitEnum(Mask.bits(4, 2), EventId);
-        // pub const event_trigger = reg.BitTrigger(Mask.bit(6));
     };
 }
 
