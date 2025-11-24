@@ -53,7 +53,7 @@ fn ReadWrite(reg: Reg) type {
     const r = Read(reg);
     const w = Write(reg);
     return struct {
-        pub fn modify(val: u32, mask: Mask) void {
+        pub fn modify(val: u32, comptime mask: Mask) void {
             const rv = r.read(null);
             const wv = mask.insert(rv, val);
             w.write(wv);
