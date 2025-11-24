@@ -1,33 +1,27 @@
-pub const RawMask = struct {
-    mask: u32,
+pub inline fn get_mask(T: type, v: T, mask: T) T {
+    return v & mask;
+}
 
-    pub fn get(self: Mask, v: u32) u32 {
-        return v & self.mask;
-    }
+pub inline fn set_mask(T: type, v: T, mask: T) T {
+    return v | mask;
+}
 
-    pub fn set(self: Mask, v: u32) u32 {
-        return v | self.mask;
-    }
+pub inline fn clear_mask(T: type, v: T, mask: T) T {
+    return v & ~mask;
+}
 
-    pub fn clear(self: Mask, v: u32) u32 {
-        return v & ~self.mask;
-    }
-
-    pub fn toggle(self: Mask, v: u32) u32 {
-        return v ^ self.mask;
-    }
-};
+pub inline fn toggle_mask(T: type, v: T, mask: T) T {
+    return v ^ mask;
+}
 
 pub const Mask = struct {
     s: u5,
     l: u5,
-    mask: u32,
 
     pub fn bits(s: u5, l: u5) Mask {
         return .{
             .s = s,
             .l = l,
-            .mask = ((1 << l) - 1) << s,
         };
     }
 
@@ -43,27 +37,31 @@ pub const Mask = struct {
         return bits(s * 8, 8);
     }
 
-    pub fn get(self: Mask, v: u32) u32 {
-        return v & self.mask;
+    pub inline fn mask(self: Mask) u32 {
+        return ((@as(u32, 1) << self.l) - 1) << self.s;
     }
 
-    pub fn set(self: Mask, v: u32) u32 {
-        return v | self.mask;
+    pub inline fn get(self: Mask, v: u32) u32 {
+        return get_mask(u32, v, self.mask());
     }
 
-    pub fn clear(self: Mask, v: u32) u32 {
-        return v & ~self.mask;
+    pub inline fn set(self: Mask, v: u32) u32 {
+        return set_mask(u32, v, self.mask());
     }
 
-    pub fn toggle(self: Mask, v: u32) u32 {
-        return v ^ self.mask;
+    pub inline fn clear(self: Mask, v: u32) u32 {
+        return clear_mask(u32, v, self.mask());
     }
 
-    pub fn extract(self: Mask, v: u32) u32 {
-        return (v & self.mask) >> self.s;
+    pub inline fn toggle(self: Mask, v: u32) u32 {
+        return toggle_mask(u32, v, self.mask());
     }
 
-    pub fn insert(self: Mask, v: u32, x: u32) u32 {
-        return (v & ~self.mask) | ((x << self.s) & self.mask);
+    pub inline fn extract(self: Mask, v: u32) u32 {
+        return (v & self.mask()) >> self.s;
+    }
+
+    pub inline fn insert(self: Mask, v: u32, x: u32) u32 {
+        return (v & ~self.mask()) | ((x << self.s) & self.mask());
     }
 };
