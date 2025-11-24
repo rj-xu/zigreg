@@ -20,7 +20,7 @@ pub const Reg = struct {
 
 const Read = struct {
     reg: Reg,
-    pub fn read(self: Read, comptime mask: ?Mask) u32 {
+    pub fn read(comptime self: Read, comptime mask: ?Mask) u32 {
         const seed: u64 = @bitCast(std.time.milliTimestamp());
         var rng = std.Random.DefaultPrng.init(seed);
         const val = rng.random().int(u32);
@@ -36,12 +36,12 @@ const Read = struct {
 
 const Write = struct {
     reg: Reg,
-    pub fn write(self: Write, val: u32) void {
+    pub fn write(comptime self: Write, val: u32) void {
         std.debug.print("Write ", .{});
         self.reg.print_name();
         std.debug.print(" = 0x{X}\n", .{val});
     }
-    pub fn trigger(self: Write, val: u32) void {
+    pub fn trigger(comptime self: Write, val: u32) void {
         self.write(val);
         self.write(0x00);
     }
@@ -58,12 +58,12 @@ const ReadWrite = struct {
             .w = .{ .reg = reg },
         };
     }
-    pub fn modify(self: ReadWrite, val: u32, mask: Mask) void {
+    pub fn modify(comptime self: ReadWrite, val: u32, comptime mask: Mask) void {
         const rv = self.r.read(null);
         const wv = mask.insert(rv, val);
         self.w.write(wv);
     }
-    pub fn trigger(self: ReadWrite, val: u32, comptime mask: ?Mask) void {
+    pub fn trigger(comptime self: ReadWrite, val: u32, comptime mask: ?Mask) void {
         const rv = self.r.read(null);
         const wv = mask.insert(rv, val);
         const zv = mask.insert(wv, 0x00);
@@ -97,20 +97,20 @@ pub const RegWo = struct {
 const BitFieldRw = struct {
     reg: RegRw,
     mask: Mask,
-    pub fn read(self: BitFieldRw) u32 {
+    pub fn read(comptime self: BitFieldRw) u32 {
         return self.reg.r.read(self.mask);
     }
-    pub fn write(self: BitFieldRw, val: u32) void {
+    pub fn write(comptime self: BitFieldRw, val: u32) void {
         self.reg.rw.modify(val, self.mask);
     }
 };
 const BitBoolRw = struct {
     reg: RegRw,
     mask: Mask,
-    pub fn read(self: BitBoolRw) bool {
+    pub fn read(comptime self: BitBoolRw) bool {
         return self.reg.r.read(self.mask) != 0;
     }
-    pub fn write(self: BitBoolRw, val: bool) void {
+    pub fn write(comptime self: BitBoolRw, val: bool) void {
         self.reg.rw.modify(if (val) 1 else 0, self.mask);
     }
 };
@@ -118,10 +118,10 @@ fn BitEnumRw(T: type) type {
     return struct {
         reg: RegRw,
         mask: Mask,
-        pub fn read(self: @This()) T {
+        pub fn read(comptime self: @This()) T {
             return @enumFromInt(self.reg.r.read(self.mask));
         }
-        pub fn write(self: @This(), val: T) void {
+        pub fn write(comptime self: @This(), val: T) void {
             self.reg.rw.modify(@intFromEnum(val), self.mask);
         }
     };
