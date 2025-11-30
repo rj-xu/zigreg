@@ -16,14 +16,12 @@ pub inline fn toggle_mask(T: type, v: T, mask: T) T {
 
 pub const Mask = struct {
     s: u5,
-    l: u5,
     mask: u32,
 
     pub fn bits(s: u5, l: u5) Mask {
         return comptime .{
             .s = s,
-            .l = l,
-            .mask = ((1 << l) - 1) << s,
+            .mask = (1 << l) - 1,
         };
     }
 
@@ -38,10 +36,6 @@ pub const Mask = struct {
     pub fn byte(s: u5) Mask {
         return bits(s * 8, 8);
     }
-
-    // pub inline fn mask(self: Mask) u32 {
-    //     return ((@as(u32, 1) << self.l) - 1) << self.s;
-    // }
 
     pub inline fn get(self: Mask, v: u32) u32 {
         return get_mask(u32, v, self.mask);

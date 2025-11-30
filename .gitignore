@@ -8,3 +8,4 @@ zig-out/
 *.pdb
 *.lib
 *.s
+rust_reg10*
